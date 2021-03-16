@@ -2,6 +2,7 @@
 
 const express = require('express');
 const { fstat } = require('fs');
+const { networkInterfaces } = require('os');
 const path = require('path');
 
 // Sets up the Express App
@@ -211,7 +212,20 @@ app.get('/api/notes', (req, res) => {
 
   return res.json(chosen);
 
-  res.end();
+  res.end(chosen);
+});
+
+// Create New Notes - takes in JSON input
+app.post('/api/notes', (req, res) => {
+  const newNote = req.body;
+
+  console.log(newNote);
+
+
+  ///????----HOW DO I POST TO THE DB.JSON FILE? -----????
+  notes.push(newNote);
+
+  res.json(newNote);
 });
 
 // Listener
