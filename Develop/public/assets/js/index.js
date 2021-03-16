@@ -1,6 +1,7 @@
 // Set up Dependencies
 
 const express = require('express');
+const { fstat } = require('fs');
 const path = require('path');
 
 // Sets up the Express App
@@ -197,11 +198,21 @@ getAndRenderNotes();
 
 // Routes
 
-// Basic route that sends the user first to the AJAX Page
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'Develop/public/index.html')));
+// Basic route that sends the user first to index.html
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'Develop/public/index.html')));
 
-app.get('/add', (req, res) => res.sendFile(path.join(__dirname, 'Develop/public/notes.html')));
+//html route to return the notes.html file
+app.get('/notes', (req, res) => res.sendFile(path.join(__dirname, 'Develop/public/notes.html')));
 
+// get /api/notes should read the db.json file and return all saved notes as JSON
+app.get('/api/notes', (req, res) => {
+  fstat.readFile(path.join(__dirname, 'Develop/db/db.json'))
+  const chosen = req.params.notes;
+
+  return res.json(chosen);
+
+  res.end();
+});
 
 // Listener
 app.listen(PORT, () => console.log(`App listening on PORT ${PORT}`));
