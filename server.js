@@ -2,7 +2,6 @@
 
 const express = require('express');
 const fs = require('fs');
-const { networkInterfaces } = require('os');
 const path = require('path');
 
 // Sets up the Express App
@@ -15,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
+const notes = []
 
 
 
@@ -30,27 +29,32 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '/public/index.html')));
 
 //html route to return the notes.html file
-app.get('/notes', (req, res) => res.sendFile(path.join(__dirname, '/public/notes.html')));
+app.get('/notes', (req, res) => res.sendFile(path.join(__dirname, 'public/notes.html')));
 
 // get /api/notes should read the db.json file and return all saved notes as JSON
 app.get('/api/notes', (req, res) => {
-  fs.readFile(path.join(__dirname, '/db.json'))
+    res.json(notes)
+  fs.readFile(path.join(__dirname, '/db.json'), (err) => {
+      if (err) throw err;
+  })
   const chosen = req.params.notes;
-
+  res.writeHead('200', 'Context, text/html')
   res.json(chosen);
 });
 
 // Create New Notes - takes in JSON input
 app.post('/api/notes', (req, res) => {
   const newNote = req.body;
-
-  console.log(newNote);
-
-
-  ///????----HOW DO I POST TO THE DB.JSON FILE? -----????
+  newNote.noteTitle = newNote.title.replace(/\s+/g, '').toLowerCase();
+  newNote.noteText = newNote.text.replace(/\s+/g, '').toLowerCase();
   notes.push(newNote);
-
+  console.log(newNote);
+  console.log(notes);
   res.json(newNote);
+  fs.writeFile('./db.json', newNote, (err) => {
+    if (err) throw err;
+  });
+
 });
 
 // Listener
