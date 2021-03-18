@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const notes = []
+
 
 
 
@@ -33,26 +33,34 @@ app.get('/notes', (req, res) => res.sendFile(path.join(__dirname, 'public/notes.
 
 // get /api/notes should read the db.json file and return all saved notes as JSON
 app.get('/api/notes', (req, res) => {
-    res.json(notes)
-  fs.readFile(path.join(__dirname, '/db.json'), (err) => {
+    // res.json('db.json')
+  fs.readFile(path.join(__dirname, '/db.json'), 'utf8', (err, data) => {
       if (err) throw err;
+      console.log(JSON.stringify(data));
+
+      ///use this data and post it to notes.
   })
 });
 
 // Create New Notes - takes in JSON input
 app.post('/api/notes', (req, res) => {
+  // const notes = []
   const newNote = req.body;
+  // console.log(newNote);
   newNote.noteTitle = newNote.title.replace(/\s+/g, '').toLowerCase();
   newNote.noteText = newNote.text.replace(/\s+/g, '').toLowerCase();
-  notes.push(newNote);
-  console.log(newNote);
+  // notes.push(newNote);
   console.log(notes);
   res.json(newNote);
-  fs.writeFile('./db.json', JSON.stringify(newNote), (err) => {
+  fs.appendFile('./db.json', JSON.stringify(notes), (err) => {
     if (err) throw err;
   });
-
 });
+
+//Delete Notes
+app.delete('/api/notes', (err => {
+  if(err) throw err;
+}))
 
 // Listener
 app.listen(PORT, () => console.log(`App listening on PORT ${PORT}`));
