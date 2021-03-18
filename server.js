@@ -37,9 +37,6 @@ app.get('/api/notes', (req, res) => {
   fs.readFile(path.join(__dirname, '/db.json'), (err) => {
       if (err) throw err;
   })
-  const chosen = req.params.notes;
-  res.writeHead('200', 'Context, text/html')
-  res.json(chosen);
 });
 
 // Create New Notes - takes in JSON input
@@ -51,7 +48,7 @@ app.post('/api/notes', (req, res) => {
   console.log(newNote);
   console.log(notes);
   res.json(newNote);
-  fs.writeFile('./db.json', newNote, (err) => {
+  fs.writeFile('./db.json', JSON.stringify(newNote), (err) => {
     if (err) throw err;
   });
 
@@ -59,3 +56,4 @@ app.post('/api/notes', (req, res) => {
 
 // Listener
 app.listen(PORT, () => console.log(`App listening on PORT ${PORT}`));
+
