@@ -1,13 +1,15 @@
-// Set up Dependencies
+//Require Dependencies
 
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const { DEFAULT_ECDH_CURVE } = require('tls');
 
-// Sets up the Express App
+
+//set up express app
 
 const app = express();
-const PORT = 3000;
+const PORT = 3030;
 
 // Sets up the Express app to handle data parsing
 app.use(express.urlencoded({ extended: true }));
@@ -16,14 +18,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 
-
-
-
-
-
-
-
-// Routes/
+//set up Routes
 
 // Basic route that sends the user first to index.html
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '/public/index.html')));
@@ -31,37 +26,51 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, '/public/index.html
 //html route to return the notes.html file
 app.get('/notes', (req, res) => res.sendFile(path.join(__dirname, 'public/notes.html')));
 
-// get /api/notes should read the db.json file and return all saved notes as JSON
+
+//Get Existing Notes pulled from the server or db.json file
 app.get('/api/notes', (req, res) => {
-    // res.json('db.json')
-  fs.readFile(path.join(__dirname, '/db.json'), 'utf8', (err, data) => {
-      if (err) throw err;
-      console.log(JSON.stringify(data));
-
-      ///use this data and post it to notes.
-  })
+  //putting this in the function since putting the dependency as a global variable wouldn't work
+  const dataBase = require('./db.json');
+  res.send(dataBase);
+  // console.log(dataBase);
+  res.end();
 });
 
-// Create New Notes - takes in JSON input
+// Create and Post New Notes - takes in JSON input
+
 app.post('/api/notes', (req, res) => {
-  // const notes = []
-  const newNote = req.body;
-  // console.log(newNote);
-  newNote.noteTitle = newNote.title.replace(/\s+/g, '').toLowerCase();
-  newNote.noteText = newNote.text.replace(/\s+/g, '').toLowerCase();
-  // notes.push(newNote);
-  console.log(notes);
-  res.json(newNote);
-  fs.appendFile('./db.json', JSON.stringify(notes), (err) => {
+  fs.readFile(__dirname + '/db.json', 'utf8', function (err, notes) {
     if (err) throw err;
-  });
-});
+    notes = JSON.parse(notes)
+    let id = notes[notes.length -1].id +1;
+    let templateNote = {
+      title: req.body.title, 
+      text: req.body.text, 
+      id: id}
+    let newNote = notes.concat(templateNote)
+    fs.writeFile(__dirname + "/db.json", JSON.stringify(newNote), (err, data) => {
+      if (err) throw err;
+      console.log(newNote)
+      res.json(newNote);
+      res.end();
 
-//Delete Notes
-app.delete('/api/notes', (err => {
-  if(err) throw err;
-}))
+    })
+  })
+})
+app.delete('/api/notes/:id', (req, res) => {
+  const noteId = JSON.parse(req.params.id)
+  console.log(noteId);
+    fs.readFile(__dirname + '/db.json', 'utf8', (err, notes) => {
+      if(err) throw err;
+      notes = JSON.parse(notes);
+      notes = notes.filter(val => val.id != noteId)
+
+      fs.writeFile(__dirname + '/db.json', JSON.stringify(notes), (err, data) => {
+        if(err) throw err;
+        res.json(notes)
+      })
+    })
+});
 
 // Listener
 app.listen(PORT, () => console.log(`App listening on PORT ${PORT}`));
-
