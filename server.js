@@ -1,9 +1,9 @@
+let idNumber= 0;
 //Require Dependencies
-
+console.log("hi");
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const { DEFAULT_ECDH_CURVE } = require('tls');
 
 
 //set up express app
@@ -36,40 +36,44 @@ app.get('/api/notes', (req, res) => {
   res.end();
 });
 
+// console.log(id);
 // Create and Post New Notes - takes in JSON input
-
 app.post('/api/notes', (req, res) => {
   fs.readFile(__dirname + '/db.json', 'utf8', function (err, notes) {
     if (err) throw err;
     notes = JSON.parse(notes)
-    let id = notes[notes.length -1].id +1;
+    idNumber = idNumber + 1;
     let templateNote = {
-      title: req.body.title, 
-      text: req.body.text, 
-      id: id}
+      title: req.body.title,
+      text: req.body.text,
+      id: idNumber
+    }
+
     let newNote = notes.concat(templateNote)
-    fs.writeFile(__dirname + "/db.json", JSON.stringify(newNote), (err, data) => {
+    fs.writeFile(__dirname + "/db.json", JSON.stringify(newNote), (err, notes) => {
       if (err) throw err;
       console.log(newNote)
       res.json(newNote);
-      res.end();
+      // res.end();
 
     })
+    // console.log(id);
+    return idNumber;
   })
 })
 app.delete('/api/notes/:id', (req, res) => {
   const noteId = JSON.parse(req.params.id)
   console.log(noteId);
-    fs.readFile(__dirname + '/db.json', 'utf8', (err, notes) => {
-      if(err) throw err;
-      notes = JSON.parse(notes);
-      notes = notes.filter(val => val.id != noteId)
+  fs.readFile(__dirname + '/db.json', 'utf8', (err, notes) => {
+    if (err) throw err;
+    notes = JSON.parse(notes);
+    notes = notes.filter(val => val.id != noteId)
 
-      fs.writeFile(__dirname + '/db.json', JSON.stringify(notes), (err, data) => {
-        if(err) throw err;
-        res.json(notes)
-      })
+    fs.writeFile(__dirname + '/db.json', JSON.stringify(notes), (err, data) => {
+      if (err) throw err;
+      res.json(notes)
     })
+  })
 });
 
 // Listener
