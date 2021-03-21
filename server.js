@@ -1,6 +1,5 @@
 
 //Require Dependencies
-console.log("hi");
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -26,30 +25,30 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, '/public/index.html
 //html route to return the notes.html file
 app.get('/notes', (req, res) => res.sendFile(path.join(__dirname, 'public/notes.html')));
 
-let idNumber = 0;
+let idNumber;
 
 function start() {
   //Display the notes from json file
   app.get('/api/notes', function (req, res) {
-    idNumber++;
+ 
     fs.readFile(__dirname + '/db/db.json', 'utf8', function (err, data) {
       if (err) throw err;
-      console.log("These are the saved notes", data)
       res.json(JSON.parse(data))
     })
   });
-
+ 
   // console.log(id);
   // Create and Post New Notes - takes in JSON input
   app.post('/api/notes', (req, res) => {  
     fs.readFile(__dirname + '/db/db.json', 'utf8', function (err, notes) {
+      idNumber = notes.length
       if (err) throw err;
       notes = JSON.parse(notes)
 
       let templateNote = {
         title: req.body.title,
         text: req.body.text,
-        id: (idNumber)
+        id: (idNumber + 1)
       }
 
       let newNote = notes.concat(templateNote)
