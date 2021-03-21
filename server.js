@@ -26,11 +26,12 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, '/public/index.html
 //html route to return the notes.html file
 app.get('/notes', (req, res) => res.sendFile(path.join(__dirname, 'public/notes.html')));
 
-let idNumber = 1;
+let idNumber = 0;
 
 function start() {
   //Display the notes from json file
   app.get('/api/notes', function (req, res) {
+    idNumber++;
     fs.readFile(__dirname + '/db/db.json', 'utf8', function (err, data) {
       if (err) throw err;
       console.log("These are the saved notes", data)
@@ -38,16 +39,9 @@ function start() {
     })
   });
 
-  function increment(idNumber) {
-    idNumber++;
-    return idNumber;
-  }
-
   // console.log(id);
   // Create and Post New Notes - takes in JSON input
-  app.post('/api/notes', (req, res) => {
-
-    increment(idNumber);
+  app.post('/api/notes', (req, res) => {  
     fs.readFile(__dirname + '/db/db.json', 'utf8', function (err, notes) {
       if (err) throw err;
       notes = JSON.parse(notes)
@@ -55,11 +49,8 @@ function start() {
       let templateNote = {
         title: req.body.title,
         text: req.body.text,
-        id: (idNumber + 1)
+        id: (idNumber)
       }
-
-      // idNumber = notes.id + 1
-      // increment(idNumber);
 
       let newNote = notes.concat(templateNote)
       fs.writeFile(__dirname + "/db/db.json", JSON.stringify(newNote), (err, data) => {
@@ -69,10 +60,13 @@ function start() {
         // res.end();
 
       })
-      // console.log(id);
-
+      start();
     })
+
   })
+
+
+
   app.delete('/api/notes/:id', (req, res) => {
     const noteId = JSON.parse(req.params.id)
     console.log(noteId);
@@ -88,6 +82,8 @@ function start() {
     })
   });
 }
+  // idNumber = notes.id + 1
+  idNumber++;
 
 
 // Listener
